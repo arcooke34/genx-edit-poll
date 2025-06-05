@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The GenX Edit - Poll Widget</title>
+    <style>
+        :root {
+            --primary-color: #8e44ad;
+            --secondary-color: #f39c12;
+            --background-color: #f5f5f5;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --hover-color: #7d3c98;
+            --result-bar-color: #8e44ad;
+            --font-family: 'Arial', sans-serif;
+        }
+
+        /* Retro 90s theme - can be toggled via the customizer */
+        .theme-retro90s {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --background-color: #f7f7f7;
+            --text-color: #333333;
+            --border-color: #ff6b6b;
+            --hover-color: #ff5252;
+            --result-bar-color: #4ecdc4;
+            --font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+        }
+
+        /* 80s theme - can be toggled via the customizer */
+        .theme-80s {
+            --primary-color: #ff00ff;
+            --secondary-color: #00ffff;
+            --background-color: #000000;
+            --text-color: #ffffff;
+            --border-color: #ff00ff;
+            --hover-color: #cc00cc;
+            --result-bar-color: #00ffff;
+            --font-family: 'VT323', monospace;
+        }
+
+        /* Conservative business theme - added per request */
+        .theme-business {
+            --primary-color: #003366;
+            --secondary-color: #336699;
+            --background-color: #f9f9f9;
+            --text-color: #333333;
+            --border-color: #cccccc;
+            --hover-color: #002244;
+            --result-bar-color: #336699;
+            --font-family: 'Georgia', serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .poll-widget {
+            background-color: var(--background-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .poll-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .poll-question {
+            padding: 20px;
+            font-size: 16px;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .poll-options {
+            padding: 10px 20px;
+        }
+
+        .poll-option {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        .poll-option:hover {
+            border-color: var(--hover-color);
+            background-color: #f9f9f9;
+        }
+
+        .poll-option.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(142, 68, 173, 0.05);
+        }
+
+        .poll-footer {
+            padding: 15px 20px;
+            text-align: right;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .poll-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+        }
+
+        .poll-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .poll-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .poll-results {
+            padding: 10px 20px;
+            display: none;
+        }
+
+        .result-item {
+            margin: 15px 0;
+        }
+
+        .result-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .result-bar-container {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .result-bar {
+            height: 100%;
+            background-color: var(--result-bar-color);
+            border-radius: 10px;
+            transition: width 1s ease-out;
+        }
+
+        .poll-total {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
+        .poll-message {
+            text-align: center;
+            padding: 15px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Customizer styles */
+        .customizer {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .customizer h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        .customizer-section {
+            margin-bottom: 15px;
+        }
+
+        .customizer-label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .customizer-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .theme-button {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .theme-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .theme-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .export-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .export-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .export-button:hover {
+            opacity: 0.9;
+        }
+
+        .code-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .code-box {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .copy-button {
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            float: right;
+        }
+
+        .copy-button:hover {
+            background-color: #333;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .theme-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="customizer">
+            <h3>Poll Customizer</h3>
+            
+            <div class="customizer-section">
+                <label class="customizer-label">Choose a Theme:</label>
+                <div class="theme-buttons">
+                    <button class="theme-button active" data-theme="default">Default</button>
+                    <button class="theme-button" data-theme="retro90s">90s Style</button>
+                    <button class="theme-button" data-theme="80s">80s Neon</button>
+                    <button class="theme-button" data-theme="business">Conservative Business</button>
+                </div>
+            </div>
+            
+            <div class="customizer-section">
+                <label class="customizer-label">Poll Title:</label>
+                <input type="text" id="poll-title" class="customizer-input" value="The GenX Edit: Poll of the Week">
+            </div>
+            
+            <div class="customizer-section">
+                <label class="customizer-label">Poll Question:</label>
+                <input type="text" id="poll-question" class="customizer-input" value="What was your go-to summer accessory in 1992?">
+            </div>
+            
+            <div class="customizer-section">
+                <label class="customizer-label">Poll Options (one per line):</label>
+                <textarea id="poll-options" class="customizer-input" rows="4">Ray-Ban Wayfarers
+Walkman with mixtape
+Hypercolor T-shirt
+Slap bracelet</textarea>
+            </div>
+            
+            <div class="customizer-section">
+                <label class="customizer-label">Primary Color:</label>
+                <input type="color" id="primary-color" class="color-picker" value="#8e44ad">
+            </div>
+            
+            <div class="customizer-section">
+                <label class="customizer-label">Result Bar Color:</label>
+                <input type="color" id="result-bar-color" class="color-picker" value="#8e44ad">
+            </div>
+            
+            <div class="customizer-section">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="hide-total-votes">
+                    <label for="hide-total-votes">Hide total number of votes</label>
+                </div>
+            </div>
+            
+            <button id="update-poll" class="poll-button">Update Poll</button>
+            
+            <div class="export-section">
+                <button id="export-csv" class="export-button">Export Results (CSV)</button>
+                <button id="export-json" class="export-button">Export Results (JSON)</button>
+                <button id="reset-results" class="export-button" style="background-color: #e74c3c;">Reset Results</button>
+            </div>
+            
+            <div class="code-section">
+                <label class="customizer-label">Embed Code:</label>
+                <div class="code-box" id="embed-code">
+                    <!-- Embed code will be generated here -->
+                </div>
+                <button id="copy-code" class="copy-button">Copy Code</button>
+            </div>
+        </div>
+        
+        <div class="poll-widget" id="genx-poll">
+            <div class="poll-header" id="poll-header">The GenX Edit: Poll of the Week</div>
+            <div class="poll-question" id="poll-question-display">What was your go-to summer accessory in 1992?</div>
+            <div class="poll-options" id="poll-options-container">
+                <!-- Options will be generated here -->
+            </div>
+            <div class="poll-footer">
+                <button id="vote-button" class="poll-button" disabled>Vote</button>
+            </div>
+            <div class="poll-results" id="poll-results">
+                <!-- Results will be displayed here -->
+                <div class="poll-total" id="poll-total">Total votes: 0</div>
+            </div>
+            <div class="poll-message" id="poll-message"></div>
+        </div>
+    </div>
+
+    <script>
+        // Poll data structure
+        let pollData = {
+            title: "The GenX Edit: Poll of the Week",
+            question: "What was your go-to summer accessory in 1992?",
+            options: [
+                "Ray-Ban Wayfarers",
+                "Walkman with mixtape",
+                "Hypercolor T-shirt",
+                "Slap bracelet"
+            ],
+            results: [0, 0, 0, 0],
+            totalVotes: 0,
+            userVoted: false,
+            userSelection: null,
+            hideTotalVotes: false
+        };
+
+        // DOM elements
+        const pollHeader = document.getElementById('poll-header');
+        const pollQuestionDisplay = document.getElementById('poll-question-display');
+        const pollOptionsContainer = document.getElementById('poll-options-container');
+        const voteButton = document.getElementById('vote-button');
+        const pollResults = document.getElementById('poll-results');
+        const pollTotal = document.getElementById('poll-total');
+        const pollMessage = document.getElementById('poll-message');
+        const pollWidget = document.getElementById('genx-poll');
+
+        // Customizer elements
+        const pollTitleInput = document.getElementById('poll-title');
+        const pollQuestionInput = document.getElementById('poll-question');
+        const pollOptionsInput = document.getElementById('poll-options');
+        const primaryColorInput = document.getElementById('primary-color');
+        const resultBarColorInput = document.getElementById('result-bar-color');
+        const hideTotalVotesCheckbox = document.getElementById('hide-total-votes');
+        const updatePollButton = document.getElementById('update-poll');
+        const exportCsvButton = document.getElementById('export-csv');
+        const exportJsonButton = document.getElementById('export-json');
+        const resetResultsButton = document.getElementById('reset-results');
+        const embedCodeBox = document.getElementById('embed-code');
+        const copyCodeButton = document.getElementById('copy-code');
+        const themeButtons = document.querySelectorAll('.theme-button');
+
+        // Initialize the poll
+        function initPoll() {
+            // Load saved data if available
+            loadPollData();
+            
+            // Render the poll
+            renderPoll();
+            
+            // Update embed code
+            updateEmbedCode();
+            
+            // Set hide total votes checkbox
+            hideTotalVotesCheckbox.checked = pollData.hideTotalVotes;
+        }
+
+        // Render the poll options
+        function renderPoll() {
+            // Update header and question
+            pollHeader.textContent = pollData.title;
+            pollQuestionDisplay.textContent = pollData.question;
+            
+            // Clear options container
+            pollOptionsContainer.innerHTML = '';
+            
+            // Add options
+            pollData.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'poll-option';
+                optionElement.dataset.index = index;
+                optionElement.textContent = option;
+                
+                // Mark selected option if user has voted
+                if (pollData.userVoted && pollData.userSelection === index) {
+                    optionElement.classList.add('selected');
+                }
+                
+                // Add click event
+                optionElement.addEventListener('click', () => selectOption(index));
+                
+                pollOptionsContainer.appendChild(optionElement);
+            });
+            
+            // Update vote button state
+            voteButton.disabled = pollData.userSelection === null;
+            
+            // Show results if user has voted
+            if (pollData.userVoted) {
+                showResults();
+            } else {
+                hideResults();
+            }
+        }
+
+        // Select an option
+        function selectOption(index) {
+            // If user has already voted, don't allow selection
+            if (pollData.userVoted) return;
+            
+            // Update selection
+            pollData.userSelection = index;
+            
+            // Update UI
+            document.querySelectorAll('.poll-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelector(`.poll-option[data-index="${index}"]`).classList.add('selected');
+            
+            // Enable vote button
+            voteButton.disabled = false;
+        }
+
+        // Submit vote
+        function submitVote() {
+            if (pollData.userSelection === null) return;
+            
+            // Increment vote count
+            pollData.results[pollData.userSelection]++;
+            pollData.totalVotes++;
+            pollData.userVoted = true;
+            
+            // Save data
+            savePollData();
+            
+            // Show results
+            showResults();
+            
+            // Show thank you message
+            pollMessage.textContent = "Thank you for voting!";
+            setTimeout(() => {
+                pollMessage.textContent = "";
+            }, 3000);
+        }
+
+        // Show results
+        function showResults() {
+            // Hide options
+            pollOptionsContainer.style.display = 'none';
+            
+            // Clear results container
+            pollResults.innerHTML = '';
+            
+            // Add results
+            pollData.options.forEach((option, index) => {
+                const percentage = pollData.totalVotes > 0 
+                    ? Math.round((pollData.results[index] / pollData.totalVotes) * 100) 
+                    : 0;
+                
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                
+                const resultLabel = document.createElement('div');
+                resultLabel.className = 'result-label';
+                
+                const optionText = document.createElement('span');
+                optionText.textContent = option;
+                
+                const percentageText = document.createElement('span');
+                percentageText.textContent = `${percentage}%`;
+                
+                resultLabel.appendChild(optionText);
+                resultLabel.appendChild(percentageText);
+                
+                const barContainer = document.createElement('div');
+                barContainer.className = 'result-bar-container';
+                
+                const bar = document.createElement('div');
+                bar.className = 'result-bar';
+                bar.style.width = '0%';
+                
+                barContainer.appendChild(bar);
+                
+                resultItem.appendChild(resultLabel);
+                resultItem.appendChild(barContainer);
+                
+                pollResults.appendChild(resultItem);
+                
+                // Animate bar after a short delay
+                setTimeout(() => {
+                    bar.style.width = `${percentage}%`;
+                }, 100);
+            });
+            
+            // Add total votes if not hidden
+            if (!pollData.hideTotalVotes) {
+                const totalElement = document.createElement('div');
+                totalElement.className = 'poll-total';
+                totalElement.id = 'poll-total';
+                totalElement.textContent = `Total votes: ${pollData.totalVotes}`;
+                pollResults.appendChild(totalElement);
+            }
+            
+            // Show results container
+            pollResults.style.display = 'block';
+            
+            // Disable vote button
+            voteButton.disabled = true;
+        }
+
+        // Hide results
+        function hideResults() {
+            pollOptionsContainer.style.display = 'block';
+            pollResults.style.display = 'none';
+        }
+
+        // Save poll data to localStorage
+        function savePollData() {
+            localStorage.setItem('genxEditPollData', JSON.stringify(pollData));
+        }
+
+        // Load poll data from localStorage
+        function loadPollData() {
+            const savedData = localStorage.getItem('genxEditPollData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                
+                // Only load results and user voting status
+                pollData.results = parsedData.results || [0, 0, 0, 0];
+                pollData.totalVotes = parsedData.totalVotes || 0;
+                pollData.userVoted = parsedData.userVoted || false;
+                pollData.userSelection = parsedData.userSelection;
+                pollData.hideTotalVotes = parsedData.hideTotalVotes || false;
+                
+                // Update customizer fields
+                pollTitleInput.value = pollData.title;
+                pollQuestionInput.value = pollData.question;
+                pollOptionsInput.value = pollData.options.join('\n');
+            }
+        }
+
+        // Update poll from customizer
+        function updatePollFromCustomizer() {
+            pollData.title = pollTitleInput.value;
+            pollData.question = pollQuestionInput.value;
+            pollData.options = pollOptionsInput.value.split('\n').filter(option => option.trim() !== '');
+            pollData.hideTotalVotes = hideTotalVotesCheckbox.checked;
+            
+            // Reset results if options changed
+            if (pollData.results.length !== pollData.options.length) {
+                pollData.results = new Array(pollData.options.length).fill(0);
+                pollData.totalVotes = 0;
+                pollData.userVoted = false;
+                pollData.userSelection = null;
+            }
+            
+            // Update CSS variables
+            document.documentElement.style.setProperty('--primary-color', primaryColorInput.value);
+            document.documentElement.style.setProperty('--hover-color', adjustColor(primaryColorInput.value, -20));
+            document.documentElement.style.setProperty('--result-bar-color', resultBarColorInput.value);
+            
+            // Save and render
+            savePollData();
+            renderPoll();
+            updateEmbedCode();
+        }
+
+        // Export results to CSV
+        function exportToCsv() {
+            let csv = 'Option,Votes,Percentage\n';
+            
+            pollData.options.forEach((option, index) => {
+                const percentage = pollData.totalVotes > 0 
+                    ? Math.round((pollData.results[index] / pollData.totalVotes) * 100) 
+                    : 0;
+                csv += `"${option}",${pollData.results[index]},${percentage}%\n`;
+            });
+            
+            csv += `\nTotal Votes,${pollData.totalVotes}`;
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'genx_edit_poll_results.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Export results to JSON
+        function exportToJson() {
+            const data = {
+                title: pollData.title,
+                question: pollData.question,
+                options: pollData.options,
+                results: pollData.results,
+                totalVotes: pollData.totalVotes,
+                hideTotalVotes: pollData.hideTotalVotes,
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'genx_edit_poll_results.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Reset results
+        function resetResults() {
+            if (confirm('Are you sure you want to reset all poll results? This cannot be undone.')) {
+                pollData.results = new Array(pollData.options.length).fill(0);
+                pollData.totalVotes = 0;
+                pollData.userVoted = false;
+                pollData.userSelection = null;
+                
+                savePollData();
+                renderPoll();
+            }
+        }
+
+        // Update embed code
+        function updateEmbedCode() {
+            // Create a simplified version of the poll for embedding
+            const embedCode = `
+<!-- The GenX Edit Poll Widget -->
+<div id="genx-poll-embed" style="max-width: 500px; margin: 0 auto; font-family: Arial, sans-serif;">
+    <div style="background-color: ${primaryColorInput.value}; color: white; padding: 15px; font-weight: bold; border-radius: 8px 8px 0 0;">
+        ${pollData.title}
+    </div>
+    <div style="background-color: #f5f5f5; padding: 15px; border-radius: 0 0 8px 8px;">
+        <div style="margin-bottom: 15px; font-weight: bold;">${pollData.question}</div>
+        <div id="genx-poll-options">
+            ${pollData.options.map((option, index) => `
+            <div style="padding: 10px; margin: 8px 0; background-color: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;" 
+                 onclick="window.open('https://your-poll-url.com?vote=${index}', '_blank')">
+                ${option}
+            </div>`).join('')}
+        </div>
+        <div style="margin-top: 15px; font-size: 12px; color: #777; text-align: center;">
+            <a href="https://your-newsletter-url.com" style="color: ${primaryColorInput.value}; text-decoration: none;">
+                View results in The GenX Edit
+            </a>
+        </div>
+    </div>
+</div>
+<!-- End GenX Edit Poll Widget -->`;
+            
+            embedCodeBox.textContent = embedCode;
+        }
+
+        // Copy embed code to clipboard
+        function copyEmbedCode() {
+            const textarea = document.createElement('textarea');
+            textarea.value = embedCodeBox.textContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            copyCodeButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyCodeButton.textContent = 'Copy Code';
+            }, 2000);
+        }
+
+        // Helper function to adjust color brightness
+        function adjustColor(color, amount) {
+            return '#' + color.replace(/^#/, '').replace(/../g, color => 
+                ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2)
+            );
+        }
+
+        // Apply theme
+        function applyTheme(themeName) {
+            // Remove all theme classes
+            pollWidget.classList.remove('theme-retro90s', 'theme-80s', 'theme-business');
+            
+            // Add selected theme class
+            if (themeName !== 'default') {
+                pollWidget.classList.add(`theme-${themeName}`);
+            }
+            
+            // Update theme buttons
+            themeButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.theme === themeName);
+            });
+        }
+
+        // Event listeners
+        voteButton.addEventListener('click', submitVote);
+        updatePollButton.addEventListener('click', updatePollFromCustomizer);
+        exportCsvButton.addEventListener('click', exportToCsv);
+        exportJsonButton.addEventListener('click', exportToJson);
+        resetResultsButton.addEventListener('click', resetResults);
+        copyCodeButton.addEventListener('click', copyEmbedCode);
+        
+        // Theme buttons
+        themeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                applyTheme(button.dataset.theme);
+            });
+        });
+
+        // Initialize
+        initPoll();
+    </script>
+</body>
+</html>
